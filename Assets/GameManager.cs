@@ -54,13 +54,13 @@ public class GameManager : MonoBehaviour
         }
         if (!goingUp)
         {
-            minigamePointerPosY -= 0.1f;
+            minigamePointerPosY -= 0.04f;
             minigamePointerPos.y = minigamePointerPosY;
             minigamePointer.transform.localPosition = minigamePointerPos;
         }
         if (goingUp)
         {
-            minigamePointerPosY += 0.1f;
+            minigamePointerPosY += 0.04f;
             minigamePointerPos.y = minigamePointerPosY;
             minigamePointer.transform.localPosition = minigamePointerPos;
         }
