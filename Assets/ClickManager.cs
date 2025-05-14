@@ -7,8 +7,9 @@ public class ClickManager : MonoBehaviour
 {
     public Image blackoutImage;
     public GameObject[] rooms;
+    bool minigameOn = false;
     int activeRoom = 0;
-   public void RightButtonClick()
+    public void RightButtonClick()
     {
         Debug.Log("test");
         StartCoroutine(ChangeRoom(1, 0));
@@ -18,6 +19,7 @@ public class ClickManager : MonoBehaviour
         Debug.Log("back");
         StartCoroutine(ChangeRoom(0, 0));
     }
+
 
     public IEnumerator ChangeRoom(int roomNumber, float delay)
     {
