@@ -2280,8 +2280,8 @@ MonoBehaviour:
     callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 519420035}
-          m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+        - m_Target: {fileID: 519420034}
+          m_TargetAssemblyTypeName: ClickManager, Assembly-CSharp
           m_MethodName: TeabagClick
           m_Mode: 1
           m_Arguments:
