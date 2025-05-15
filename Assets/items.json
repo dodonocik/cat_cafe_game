@@ -1,0 +1,28 @@
+{
+    "items": [
+      {
+        "id": "black_tea",
+        "name": "Black Tea",
+        "type": "tea",
+        "flavor": ["bitter", "strong"]
+      },
+      {
+        "id": "green_tea",
+        "name": "Green Tea",
+        "type": "tea",
+        "flavor": ["grassy", "mild"]
+      },
+      {
+        "id": "orange_zest",
+        "name": "Orange Zest",
+        "type": "brewExtra",
+        "flavor": ["sweet", "citrusy", "fruity"]
+      },
+      {
+        "id": "elderflower",
+        "name": "Elderflower",
+        "type": "brewExtra",
+        "flavor": ["sweet", "floral"]
+      }
+    ]
+  }
