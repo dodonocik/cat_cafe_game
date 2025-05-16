@@ -7,8 +7,8 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     private List<string> currentOrder = new List<string>();
-  
-
+    
+    public List<Item> allItems = new List<Item>();
     public static List<Item> orderIngridients = new List<Item>();
     public static Item selectedItem;
     public static bool minigameActive = false;
@@ -36,7 +36,6 @@ public class GameManager : MonoBehaviour
     public static void StopMinigame()
     {
         BrewingMinigameManager.Instance.StopMinigame();
-        selectedItem = null;
         minigameActive = false;
         Debug.Log(orderIngridients);
     }
