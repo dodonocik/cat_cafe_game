@@ -10,73 +10,67 @@ public class ClickManager : MonoBehaviour
     public GameObject[] rooms;
     public GameObject[] teaShelves;
     public GameObject[] extrasShelves;
+    public GameObject[] addInShelves;
     public GameObject[] teabagFrames;
     public GameObject orderButtons;
     int activeRoom = 0;
     int activeShelf = 0;
     bool switchedToExtras = false;
+    bool stageOneComplete = false;
     float delay = 0.5f;
     public void RightButtonClick()
     {
         Debug.Log("test");
-        StartCoroutine(ChangeRoom(1, delay));
+        StartCoroutine(ChangeRoom(activeRoom + 1, delay));
     }
     public void LeftButtonClick()
     {
         Debug.Log("back");
-        StartCoroutine(ChangeRoom(0, delay));
+        int room = (activeRoom == 0) ? 0 : (activeRoom - 1);
+        StartCoroutine(ChangeRoom(room, delay));
     }
 
     public void NextPage()
     {
-        if(GameManager.selectedItem = null)
+        if (GameManager.selectedItem != null)
             SelectItem(GameManager.selectedItem);
-        int desiredShelf;
-        if (switchedToExtras)
+        int desiredShelf=0;
+        switch (activeRoom)
         {
-            if (extrasShelves.Length - 1 == activeShelf)
-            {
-                desiredShelf = 0;
-            }
-            else
-                desiredShelf = activeShelf + 1;
+            case 1:
+                var shelves = switchedToExtras ? extrasShelves : teaShelves;
+                desiredShelf = (shelves.Length - 1 == activeShelf) ? 0 : (activeShelf + 1);
+                StartCoroutine(SwitchPages(shelves[activeShelf], shelves[desiredShelf]));
+                break;
+
+            case 2:
+                desiredShelf = (addInShelves.Length - 1 == activeShelf) ? 0 : (activeShelf + 1);
+                StartCoroutine(SwitchPages(addInShelves[activeShelf], addInShelves[desiredShelf]));
+                break;
+
         }
-        else
-        {
-            if(teaShelves.Length - 1 == activeShelf)
-            {
-                desiredShelf = 0;
-            }
-            else
-                desiredShelf = activeShelf + 1;
-        }
-        StartCoroutine(SwitchPages(desiredShelf));
+        activeShelf = desiredShelf;
+        
     }
 
     public void PreviousPage()
     {
-        if (GameManager.selectedItem = null)
+        if (GameManager.selectedItem != null)
             SelectItem(GameManager.selectedItem);
-        int desiredShelf;
-        if (switchedToExtras)
-        {
-            if (activeShelf == 0)
-            {
-                desiredShelf = extrasShelves.Length - 1;
-            }
-            else
-                desiredShelf = activeShelf - 1;
+        int desiredShelf = 0;
+        switch (activeRoom) {
+            case 1:
+                var shelves = switchedToExtras ? extrasShelves : teaShelves;
+                desiredShelf = (activeShelf == 0) ? (shelves.Length - 1) : (activeShelf - 1);
+                StartCoroutine(SwitchPages(shelves[activeShelf], shelves[desiredShelf]));
+                break;
+            case 2:
+                desiredShelf = (activeShelf==0) ? (addInShelves.Length-1) : (activeShelf - 1);
+                StartCoroutine(SwitchPages(addInShelves[activeShelf], addInShelves[desiredShelf]));
+                break;
+
         }
-        else
-        {
-            if (activeShelf == 0)
-            {
-                desiredShelf = teaShelves.Length - 1; ;
-            }
-            else
-                desiredShelf = activeShelf - 1;
-        }
-        StartCoroutine(SwitchPages(desiredShelf));
+        activeShelf = desiredShelf;
     }
 
     public void TeabagClick()
@@ -91,21 +85,20 @@ public class ClickManager : MonoBehaviour
             {
                 StartCoroutine(SwitchToExtras());
                 teabagFrames[1].SetActive(true);
-                StartCoroutine(FadeTeabagFrame(0));
+                StartCoroutine(FadeOutFrame(teabagFrames[0]));
                 ShowOrderButtons();
             }
             if(GameManager.orderIngridients.Count == 2)
             {
                 teabagFrames[2].SetActive(true);
-                StartCoroutine (FadeTeabagFrame(1));
+                StartCoroutine (FadeOutFrame(teabagFrames[1]));
             }
             
             return;
         }
         if (!GameManager.minigameActive)
         {
-            Debug.Log("inactive");
-            if (GameManager.selectedItem != null)
+            if (GameManager.selectedItem != null)//start the game only if an item is selected
                 GameManager.StartMinigame();
         }
     }
@@ -139,16 +132,22 @@ public class ClickManager : MonoBehaviour
         {
             SelectItem(GameManager.selectedItem);//odklikowuje item
         }
-        if (switchedToExtras)
+        switch (activeRoom)
         {
-            StartCoroutine(FadeOutShelf(extrasShelves[activeShelf], delay));
-            StartCoroutine(FadeTeabagFrame(2));
+            case 1:
+                StartCoroutine(FadeInFrame(teabagFrames[0]));
+                StartCoroutine(FadeOutShelf(
+                    GameManager.orderIngridients.Count > 1
+                    ? extrasShelves[activeShelf]: teaShelves[activeShelf],delay));
+                stageOneComplete = true;
+                break;
+            case 2:
+                //wylacza teacup
+                break;
+
         }
-        else
-        {
-            StartCoroutine(FadeOutShelf(teaShelves[activeShelf], delay));
-            StartCoroutine(FadeTeabagFrame(1));
-        }
+        
+        activeShelf = 0;
         
     }
 
@@ -160,11 +159,22 @@ public class ClickManager : MonoBehaviour
             SelectItem(GameManager.selectedItem);//odklikowuje item
         }
         HideOrderButtons();
-        if(switchedToExtras)
+        
+        switch(activeRoom)
         {
-            StartCoroutine(SwitchBackToTeaShelf());
+            case 1:
+                if (switchedToExtras)
+                {
+                    StartCoroutine(SwitchBackToTeaShelf());
+                }
+                StartCoroutine(FadeInFrame(teabagFrames[0]));
+                break;
+            case 2:
+                stageOneComplete = false;
+                break;
         }
-        StartCoroutine(FadeInTeabag());
+
+        
 
     }
 
@@ -204,20 +214,11 @@ public class ClickManager : MonoBehaviour
         
     }
 
-    private IEnumerator SwitchPages(int desiredPage)
+    private IEnumerator SwitchPages(GameObject currentPage, GameObject desiredPage)
     {
-        if(switchedToExtras)
-        {
-            yield return StartCoroutine(FadeOutShelf(extrasShelves[activeShelf],delay));
-            activeShelf = desiredPage;
-            yield return StartCoroutine(FadeInShelf(extrasShelves[activeShelf], delay));
-        }
-        else
-        {
-            yield return StartCoroutine(FadeOutShelf(teaShelves[activeShelf], delay));
-            activeShelf = desiredPage;
-            yield return StartCoroutine(FadeInShelf(teaShelves[activeShelf], delay));
-        }
+            yield return StartCoroutine(FadeOutShelf(currentPage, delay));
+            yield return StartCoroutine(FadeInShelf(desiredPage, delay));
+        
     }
 
     private void ShowOrderButtons()
@@ -237,7 +238,7 @@ public class ClickManager : MonoBehaviour
         cg.interactable = false;
         cg.blocksRaycasts = false;
 
-        while (color.a < 1)
+        while (color.a > 0)
         {
             color.a -= Time.deltaTime / delay;
             foreach (SpriteRenderer sprite in sprites)
@@ -246,24 +247,15 @@ public class ClickManager : MonoBehaviour
             }
             yield return null;
         }
-
-        if(switchedToExtras)
-        {
-            extrasShelves[activeShelf].SetActive(false);
-        }
-        else
-            teaShelves[activeShelf].SetActive(false);
-
+        group.SetActive(false);
         yield return null;
     }
 
     private IEnumerator FadeInShelf(GameObject group, float delay)
     {
+        group.SetActive(true);
         CanvasGroup cg = group.GetComponent<CanvasGroup>();
-        if(switchedToExtras)
-            extrasShelves[activeShelf].SetActive(true);
-        else
-            teaShelves[activeShelf].SetActive(true);
+       
         SpriteRenderer[] sprites = group.GetComponentsInChildren<SpriteRenderer>();
         Color color = new Color(1, 1, 1, 0);
         cg.interactable = false;
@@ -295,10 +287,10 @@ public class ClickManager : MonoBehaviour
         yield return StartCoroutine(FadeInShelf(teaShelves[activeShelf], delay));
     }
 
-    private IEnumerator FadeTeabagFrame(int frame)
+    private IEnumerator FadeOutFrame(GameObject frame)
     {
         Color color = new Color(1, 1, 1, 1);
-       SpriteRenderer sr = teabagFrames[frame].GetComponent<SpriteRenderer>();
+       SpriteRenderer sr = frame.GetComponent<SpriteRenderer>();
 
         while (color.a > 0)
         {
@@ -308,33 +300,26 @@ public class ClickManager : MonoBehaviour
             
             yield return null;
         }
-        teabagFrames[frame].SetActive(false);
+        frame.SetActive(false);
 
         yield return null;
     }
-
-    private IEnumerator FadeInTeabag()
+    private IEnumerator FadeInFrame(GameObject frame)
     {
         Color color = new Color(1, 1, 1, 0);
-        teabagFrames[0].SetActive(true);
+        frame.SetActive(true);
+        SpriteRenderer sr = frame.GetComponent<SpriteRenderer>();
 
-        SpriteRenderer sr = teabagFrames[0].GetComponent<SpriteRenderer>();
         while (color.a < 1)
-            {
-                color.a += Time.deltaTime / delay;
-
-                sr.color = color;
-
-                yield return null;
-            }
-        foreach (var frame in teabagFrames)
         {
-            SpriteRenderer spr = frame.GetComponent<SpriteRenderer>();
-            spr.color = new Color(1, 1, 1, 1);
+            color.a += Time.deltaTime / delay;
 
+            sr.color = color;
+
+            yield return null;
         }
-
 
         yield return null;
     }
+
 }
