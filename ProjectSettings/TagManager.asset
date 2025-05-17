@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 3
   tags:
   - Falling Object
+  - Order Buttons
   layers:
   - Default
   - TransparentFX

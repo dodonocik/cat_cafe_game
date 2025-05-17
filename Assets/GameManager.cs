@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
     public static List<Item> orderIngridients = new List<Item>();
     public static Item selectedItem;
     public static bool minigameActive = false;
+    public static List<int> pourMinigameScores = new List<int>();
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -38,6 +39,11 @@ public class GameManager : MonoBehaviour
         BrewingMinigameManager.Instance.StopMinigame();
         minigameActive = false;
         Debug.Log(orderIngridients);
+    }
+
+    public static void StartPourMinigame()
+    {
+        PourMinigameManager.Instance.StartMinigame(selectedItem);
     }
 
   

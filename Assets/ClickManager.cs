@@ -13,10 +13,12 @@ public class ClickManager : MonoBehaviour
     public GameObject[] addInShelves;
     public GameObject[] teabagFrames;
     public GameObject orderButtons;
+    public GameObject teacup;
+    public GameObject teacupBack;
     int activeRoom = 0;
     int activeShelf = 0;
     bool switchedToExtras = false;
-    bool stageOneComplete = false;
+    bool stageTwoActive = false;
     float delay = 0.5f;
     public void RightButtonClick()
     {
@@ -85,13 +87,13 @@ public class ClickManager : MonoBehaviour
             {
                 StartCoroutine(SwitchToExtras());
                 teabagFrames[1].SetActive(true);
-                StartCoroutine(FadeOutFrame(teabagFrames[0]));
+                StartCoroutine(AnimationManager.FadeOutFrame(teabagFrames[0], delay));
                 ShowOrderButtons();
             }
             if(GameManager.orderIngridients.Count == 2)
             {
                 teabagFrames[2].SetActive(true);
-                StartCoroutine (FadeOutFrame(teabagFrames[1]));
+                StartCoroutine (AnimationManager.FadeOutFrame(teabagFrames[1], delay));
             }
             
             return;
@@ -101,6 +103,16 @@ public class ClickManager : MonoBehaviour
             if (GameManager.selectedItem != null)//start the game only if an item is selected
                 GameManager.StartMinigame();
         }
+    }
+
+    public void TeacupClick()
+    {
+        if (!stageTwoActive || GameManager.selectedItem == null)
+            return;
+        GameManager.StartPourMinigame();
+        ShowOrderButtons();
+        GameManager.orderIngridients.Add(GameManager.selectedItem);//to se gm powinien robic sam, do zmiany zaraz po poprawieniu shelfow
+        SelectItem (GameManager.selectedItem);  
     }
 
     public void SelectItem(Item item)
@@ -135,14 +147,15 @@ public class ClickManager : MonoBehaviour
         switch (activeRoom)
         {
             case 1:
-                StartCoroutine(FadeInFrame(teabagFrames[0]));
-                StartCoroutine(FadeOutShelf(
-                    GameManager.orderIngridients.Count > 1
-                    ? extrasShelves[activeShelf]: teaShelves[activeShelf],delay));
-                stageOneComplete = true;
+                StartCoroutine(AnimationManager.FadeInFrame(teabagFrames[0], delay));
+                StartCoroutine(AnimationManager.FadeOutShelf(extrasShelves[activeShelf],delay));//jesli liczba skladnikow == 1 to automatycznie ustawia sie extras shelf, nie trzeba tego sprawdzac tu
+                stageTwoActive = true;
                 break;
             case 2:
-                //wylacza teacup
+                StartCoroutine(AnimationManager.FadeOutFrame(teacup, delay));
+                StartCoroutine(AnimationManager.FadeOutShelf(addInShelves[activeShelf], delay));
+                stageTwoActive=false;
+                teacupBack.SetActive(false);
                 break;
 
         }
@@ -167,10 +180,12 @@ public class ClickManager : MonoBehaviour
                 {
                     StartCoroutine(SwitchBackToTeaShelf());
                 }
-                StartCoroutine(FadeInFrame(teabagFrames[0]));
+                StartCoroutine(AnimationManager.FadeInFrame(teabagFrames[0],delay));
                 break;
             case 2:
-                stageOneComplete = false;
+                StartCoroutine(AnimationManager.FadeOutFrame(teacup,delay));
+                teacupBack.SetActive(false);
+                stageTwoActive = false;
                 break;
         }
 
@@ -193,6 +208,7 @@ public class ClickManager : MonoBehaviour
         rooms[activeRoom].SetActive(false);
         rooms[roomNumber].SetActive(true);
         activeRoom = roomNumber;
+        SceneOnLoad();
 
         while (blackoutImage.color.a > 0)
         {
@@ -207,119 +223,72 @@ public class ClickManager : MonoBehaviour
     }
     private IEnumerator SwitchToExtras()
     {
-        yield return StartCoroutine(FadeOutShelf(teaShelves[activeShelf],delay));
+        yield return StartCoroutine(AnimationManager.FadeOutShelf(teaShelves[activeShelf],delay));
         activeShelf = 0;
         switchedToExtras = true;
-        yield return StartCoroutine(FadeInShelf(extrasShelves[activeShelf], delay));
+        yield return StartCoroutine(AnimationManager.FadeInShelf(extrasShelves[activeShelf], delay));
         
     }
 
     private IEnumerator SwitchPages(GameObject currentPage, GameObject desiredPage)
     {
-            yield return StartCoroutine(FadeOutShelf(currentPage, delay));
-            yield return StartCoroutine(FadeInShelf(desiredPage, delay));
+            yield return StartCoroutine(AnimationManager.FadeOutShelf(currentPage, delay));
+            yield return StartCoroutine(AnimationManager.FadeInShelf(desiredPage, delay));
         
     }
 
     private void ShowOrderButtons()
     {
-        orderButtons.SetActive(true);
+        Transform buttons = rooms[activeRoom].transform.Find("Order Buttons");
+
+        buttons.gameObject.SetActive(true);
+
     }
+        
     private void HideOrderButtons()
     {
-        orderButtons.SetActive(false );
-    }
-
-    private IEnumerator FadeOutShelf(GameObject group, float delay)
-    {
-        CanvasGroup cg = group.GetComponent<CanvasGroup>();
-        SpriteRenderer[] sprites = group.GetComponentsInChildren<SpriteRenderer>();
-        Color color = new Color(1, 1, 1, 1);
-        cg.interactable = false;
-        cg.blocksRaycasts = false;
-
-        while (color.a > 0)
-        {
-            color.a -= Time.deltaTime / delay;
-            foreach (SpriteRenderer sprite in sprites)
-            {               
-                sprite.color = color;               
-            }
-            yield return null;
-        }
-        group.SetActive(false);
-        yield return null;
-    }
-
-    private IEnumerator FadeInShelf(GameObject group, float delay)
-    {
-        group.SetActive(true);
-        CanvasGroup cg = group.GetComponent<CanvasGroup>();
-       
-        SpriteRenderer[] sprites = group.GetComponentsInChildren<SpriteRenderer>();
-        Color color = new Color(1, 1, 1, 0);
-        cg.interactable = false;
-        cg.blocksRaycasts = false;
-
-        while (color.a < 1)
-        {
-            color.a += Time.deltaTime / delay;
-            foreach (SpriteRenderer sprite in sprites)
-            {               
-                sprite.color = color;        
-            }
-            yield return null;
-        }
-
-        cg.interactable = true;
-        cg.blocksRaycasts = true;
-
-        yield return null;
+        Transform buttons = rooms[activeRoom].transform.Find("Order Buttons");
+        buttons.gameObject.SetActive(false );
     }
 
     private IEnumerator SwitchBackToTeaShelf()
     {
-        yield return StartCoroutine(FadeOutShelf(extrasShelves[activeShelf], delay));
+        yield return StartCoroutine(AnimationManager.FadeOutShelf(extrasShelves[activeShelf], delay));
 
         activeShelf = 0;
         switchedToExtras = false;
 
-        yield return StartCoroutine(FadeInShelf(teaShelves[activeShelf], delay));
+        yield return StartCoroutine(AnimationManager.FadeInShelf(teaShelves[activeShelf], delay));
     }
 
-    private IEnumerator FadeOutFrame(GameObject frame)
+    private void SceneOnLoad()
     {
-        Color color = new Color(1, 1, 1, 1);
-       SpriteRenderer sr = frame.GetComponent<SpriteRenderer>();
-
-        while (color.a > 0)
+        if (GameManager.selectedItem != null)
+            SelectItem(GameManager.selectedItem);
+        switch (activeRoom)
         {
-            color.a -= Time.deltaTime / delay;
+            case 0:
+                break;
+            case 1:
+                if (GameManager.orderIngridients.Count == 0)
+                {
+                    activeShelf = 0;
+                    stageTwoActive = false;
+                    switchedToExtras = false;
+                    StartCoroutine(SwitchBackToTeaShelf());
+                }
+                break;
+            case 2:
+                if (stageTwoActive)
+                {
+                    StartCoroutine(AnimationManager.FadeInFrame(teacup, delay));
+                    teacupBack.SetActive(true);
+                }
+                
 
-            sr.color = color;
-            
-            yield return null;
-        }
-        frame.SetActive(false);
-
-        yield return null;
-    }
-    private IEnumerator FadeInFrame(GameObject frame)
-    {
-        Color color = new Color(1, 1, 1, 0);
-        frame.SetActive(true);
-        SpriteRenderer sr = frame.GetComponent<SpriteRenderer>();
-
-        while (color.a < 1)
-        {
-            color.a += Time.deltaTime / delay;
-
-            sr.color = color;
-
-            yield return null;
+                break;
         }
 
-        yield return null;
     }
 
 }

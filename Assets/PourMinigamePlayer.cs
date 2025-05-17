@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
 
-public class PourMinigameePlayer : MonoBehaviour
+public class PourMinigamePlayer : MonoBehaviour
 {
     float horizontalInput;
     float moveSpeed = 10f;
@@ -20,6 +20,7 @@ public class PourMinigameePlayer : MonoBehaviour
     void Update()
     {
         horizontalInput = Input.GetAxis("Horizontal");
+        UpdateNametag();
     }
 
     private void FixedUpdate()
@@ -30,12 +31,15 @@ public class PourMinigameePlayer : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Falling Object"))
             score++;
-        UpdateNametag();
     }
     public static int GetScore()
         { return score; }
     public void UpdateNametag()
     {
        scoreDisplay.text = "Score: " + score.ToString();
+    }
+    public static void ResetGame()
+    {
+        score = 0;
     }
 }
