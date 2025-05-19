@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Runtime.CompilerServices;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -81,7 +82,6 @@ public class ClickManager : MonoBehaviour
         if (GameManager.minigameActive)
         {
             GameManager.StopMinigame();
-            GameManager.orderIngridients.Add(GameManager.selectedItem);
             SelectItem(GameManager.selectedItem);//unselect added item
             if (GameManager.orderIngridients.Count == 1)
             {
@@ -111,7 +111,6 @@ public class ClickManager : MonoBehaviour
             return;
         GameManager.StartPourMinigame();
         ShowOrderButtons();
-        GameManager.orderIngridients.Add(GameManager.selectedItem);//to se gm powinien robic sam, do zmiany zaraz po poprawieniu shelfow
         SelectItem (GameManager.selectedItem);  
     }
 
@@ -189,6 +188,7 @@ public class ClickManager : MonoBehaviour
                 break;
         }
 
+        GameManager.ClearOrder();
         
 
     }
@@ -275,7 +275,7 @@ public class ClickManager : MonoBehaviour
                     activeShelf = 0;
                     stageTwoActive = false;
                     switchedToExtras = false;
-                    StartCoroutine(SwitchBackToTeaShelf());
+                    StartCoroutine(AnimationManager.FadeInShelf(teaShelves[0],delay));
                 }
                 break;
             case 2:
@@ -289,6 +289,12 @@ public class ClickManager : MonoBehaviour
                 break;
         }
 
+    }
+
+    public void LoopOrder()
+    {
+        GameManager.updateMoney();
+        CancelOrder();
     }
 
 }

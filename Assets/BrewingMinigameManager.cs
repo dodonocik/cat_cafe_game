@@ -48,6 +48,7 @@ public class BrewingMinigameManager : MonoBehaviour
 
     public void StartMinigame()
     {
+        score = 0;
         minigame.SetActive(true);
         goingUp = true;
         minigamePointerPos = minigamePointer.transform.localPosition;
@@ -77,5 +78,10 @@ public class BrewingMinigameManager : MonoBehaviour
             minigamePointerPos.y = minigamePointerPosY;
             minigamePointer.transform.localPosition = minigamePointerPos;
         }
+    }
+
+    static public float getScore()
+    {
+        return score;
     }
 }

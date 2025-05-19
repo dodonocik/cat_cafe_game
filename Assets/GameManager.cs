@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Numerics;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class GameManager : MonoBehaviour
 {
     private List<string> currentOrder = new List<string>();
-    
+    public static int money = 0;
     public List<Item> allItems = new List<Item>();
     public static List<Item> orderIngridients = new List<Item>();
     public static Item selectedItem;
@@ -36,14 +37,20 @@ public class GameManager : MonoBehaviour
 
     public static void StopMinigame()
     {
+        
         BrewingMinigameManager.Instance.StopMinigame();
+        pourMinigameScores.Add(((int)BrewingMinigameManager.getScore()));
         minigameActive = false;
+        orderIngridients.Add(selectedItem);
+        DisplayUi.Instance.UpdateIngridients();
         Debug.Log(orderIngridients);
     }
 
     public static void StartPourMinigame()
     {
         PourMinigameManager.Instance.StartMinigame(selectedItem);
+        orderIngridients.Add(selectedItem );
+        DisplayUi.Instance.UpdateIngridients();
     }
 
   
@@ -53,7 +60,22 @@ public class GameManager : MonoBehaviour
     {
     }
 
+    public static void updateMoney()
+    {
+        foreach(var score in pourMinigameScores)
+        {
+            money += score;
+        }
+
+        DisplayUi.Instance.UpdateMoney();
+    }
     
+    public static void ClearOrder()
+    {
+        orderIngridients = new List<Item>();
+        pourMinigameScores.Clear();
+        DisplayUi.Instance.UpdateIngridients();
+    }
 }
 
 
