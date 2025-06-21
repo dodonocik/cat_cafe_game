@@ -39,7 +39,7 @@ public class DisplayUi : MonoBehaviour
         ingridients.GetComponentInChildren<TextMeshProUGUI>().text = "Ingridients:";
         foreach (var item in GameManager.orderIngridients)
         {
-            ingridients.GetComponentInChildren<TextMeshProUGUI>().text += "\n" + item.itemName;
+            ingridients.GetComponentInChildren<TextMeshProUGUI>().text += "\n" + item.name;
         }
     }
 }

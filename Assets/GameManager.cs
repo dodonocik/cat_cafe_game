@@ -9,8 +9,11 @@ public class GameManager : MonoBehaviour
 {
     private List<string> currentOrder = new List<string>();
     public static int money = 0;
-    public List<Item> allItems = new List<Item>();
-    public static List<Item> orderIngridients = new List<Item>();
+    public List<ItemObject> allItems;
+    public static List<ItemObject> teaItems= new List<ItemObject>();
+    public static List<ItemObject> toppingItems = new List<ItemObject>();
+    public static List<ItemObject> extraItems = new List<ItemObject>();
+    public static List<OrderIngredient> orderIngridients = new List<OrderIngredient>();
     public static Item selectedItem;
     public static bool minigameActive = false;
     public static List<int> pourMinigameScores = new List<int>();
@@ -18,7 +21,17 @@ public class GameManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        foreach(var item in allItems)
+        {
+            if(item.type == "tea")
+                teaItems.Add(item);
+            if(item.type == "topping")
+                toppingItems.Add(item);
+            if(item.type == "extra")
+                extraItems.Add(item);
+        }
+        foreach (var item in teaItems)
+            Debug.Log(item.name);
     }
 
     public static void StartMinigame()
@@ -41,7 +54,8 @@ public class GameManager : MonoBehaviour
         BrewingMinigameManager.Instance.StopMinigame();
         pourMinigameScores.Add(((int)BrewingMinigameManager.getScore()));
         minigameActive = false;
-        orderIngridients.Add(selectedItem);
+        OrderIngredient orderItem = new OrderIngredient(selectedItem.itemObject);
+        orderIngridients.Add(orderItem);
         DisplayUi.Instance.UpdateIngridients();
         Debug.Log(orderIngridients);
     }
@@ -49,7 +63,8 @@ public class GameManager : MonoBehaviour
     public static void StartPourMinigame()
     {
         PourMinigameManager.Instance.StartMinigame(selectedItem);
-        orderIngridients.Add(selectedItem );
+        OrderIngredient orderItem = new OrderIngredient(selectedItem.itemObject);
+        orderIngridients.Add(orderItem);
         DisplayUi.Instance.UpdateIngridients();
     }
 
@@ -72,7 +87,7 @@ public class GameManager : MonoBehaviour
     
     public static void ClearOrder()
     {
-        orderIngridients = new List<Item>();
+        orderIngridients = new List<OrderIngredient>();
         pourMinigameScores.Clear();
         DisplayUi.Instance.UpdateIngridients();
     }

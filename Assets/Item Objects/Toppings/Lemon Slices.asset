@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca64b206c194d0349823b1f26a33e08f, type: 3}
+  m_Name: Lemon Slices
+  m_EditorClassIdentifier: 
+  id: lemon_slices
+  name: Lemon Slices
+  type: topping
+  flavors:
+  - sour
+  - fruity
+  - citrusy
+  sprite: {fileID: -61595582777223207, guid: 601c8ee38e02cbf42bc1f3bf0e18f350, type: 3}
+  nameTagSize: {x: 5.188, y: 3}
+  pourMinigameSprite: {fileID: -41135474453056625, guid: 601c8ee38e02cbf42bc1f3bf0e18f350, type: 3}
+  pourSpriteColor: {r: 0.91194963, g: 0.8178213, b: 0.15199152, a: 1}

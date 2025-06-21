@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Collections;
 using UnityEngine;
@@ -9,15 +10,12 @@ public class ClickManager : MonoBehaviour
 {
     public Image blackoutImage;
     public GameObject[] rooms;
-    public GameObject[] teaShelves;
-    public GameObject[] extrasShelves;
-    public GameObject[] addInShelves;
     public GameObject[] teabagFrames;
     public GameObject orderButtons;
     public GameObject teacup;
     public GameObject teacupBack;
+    static ShelfManager shelfManager;
     int activeRoom = 0;
-    int activeShelf = 0;
     bool switchedToExtras = false;
     bool stageTwoActive = false;
     float delay = 0.5f;
@@ -33,59 +31,23 @@ public class ClickManager : MonoBehaviour
         StartCoroutine(ChangeRoom(room, delay));
     }
 
-    public void NextPage()
-    {
-        if (GameManager.selectedItem != null)
-            SelectItem(GameManager.selectedItem);
-        int desiredShelf=0;
-        switch (activeRoom)
-        {
-            case 1:
-                var shelves = switchedToExtras ? extrasShelves : teaShelves;
-                desiredShelf = (shelves.Length - 1 == activeShelf) ? 0 : (activeShelf + 1);
-                StartCoroutine(SwitchPages(shelves[activeShelf], shelves[desiredShelf]));
-                break;
-
-            case 2:
-                desiredShelf = (addInShelves.Length - 1 == activeShelf) ? 0 : (activeShelf + 1);
-                StartCoroutine(SwitchPages(addInShelves[activeShelf], addInShelves[desiredShelf]));
-                break;
-
-        }
-        activeShelf = desiredShelf;
-        
-    }
-
-    public void PreviousPage()
-    {
-        if (GameManager.selectedItem != null)
-            SelectItem(GameManager.selectedItem);
-        int desiredShelf = 0;
-        switch (activeRoom) {
-            case 1:
-                var shelves = switchedToExtras ? extrasShelves : teaShelves;
-                desiredShelf = (activeShelf == 0) ? (shelves.Length - 1) : (activeShelf - 1);
-                StartCoroutine(SwitchPages(shelves[activeShelf], shelves[desiredShelf]));
-                break;
-            case 2:
-                desiredShelf = (activeShelf==0) ? (addInShelves.Length-1) : (activeShelf - 1);
-                StartCoroutine(SwitchPages(addInShelves[activeShelf], addInShelves[desiredShelf]));
-                break;
-
-        }
-        activeShelf = desiredShelf;
-    }
-
     public void TeabagClick()
     {
         Debug.Log("click");
+        if (stageTwoActive)
+        {
+            return;
+        }
         if (GameManager.minigameActive)
         {
             GameManager.StopMinigame();
             SelectItem(GameManager.selectedItem);//unselect added item
             if (GameManager.orderIngridients.Count == 1)
             {
-                StartCoroutine(SwitchToExtras());
+                shelfManager.setItemsList(GameManager.extraItems);
+                shelfManager.resetIndex();
+                shelfManager.displayItems();
+                switchedToExtras = true;
                 teabagFrames[1].SetActive(true);
                 StartCoroutine(AnimationManager.FadeOutFrame(teabagFrames[0], delay));
                 ShowOrderButtons();
@@ -139,27 +101,14 @@ public class ClickManager : MonoBehaviour
     public void ConfirmOrder()
     {
         HideOrderButtons();
-        if (GameManager.selectedItem != null)
+        if(activeRoom == 1)
         {
-            SelectItem(GameManager.selectedItem);//odklikowuje item
+            stageTwoActive = true;
         }
-        switch (activeRoom)
+        if (activeRoom == 2)
         {
-            case 1:
-                StartCoroutine(AnimationManager.FadeInFrame(teabagFrames[0], delay));
-                StartCoroutine(AnimationManager.FadeOutShelf(extrasShelves[activeShelf],delay));//jesli liczba skladnikow == 1 to automatycznie ustawia sie extras shelf, nie trzeba tego sprawdzac tu
-                stageTwoActive = true;
-                break;
-            case 2:
-                StartCoroutine(AnimationManager.FadeOutFrame(teacup, delay));
-                StartCoroutine(AnimationManager.FadeOutShelf(addInShelves[activeShelf], delay));
-                stageTwoActive=false;
-                teacupBack.SetActive(false);
-                break;
-
+            LoopOrder();
         }
-        
-        activeShelf = 0;
         
     }
 
@@ -171,20 +120,26 @@ public class ClickManager : MonoBehaviour
             SelectItem(GameManager.selectedItem);//odklikowuje item
         }
         HideOrderButtons();
-        
-        switch(activeRoom)
+        switchedToExtras = false;
+        stageTwoActive = false;
+
+        switch (activeRoom)
         {
             case 1:
-                if (switchedToExtras)
+                shelfManager.resetIndex();
+                shelfManager.setItemsList(GameManager.teaItems);
+                shelfManager.displayItems();
+                foreach (var frame in teabagFrames)
                 {
-                    StartCoroutine(SwitchBackToTeaShelf());
+                    frame.SetActive(true);
+                    Color color = new Color(1, 1, 1, 1);
+                    SpriteRenderer sr = frame.GetComponent<SpriteRenderer>();
+                    sr.color = color;
                 }
-                StartCoroutine(AnimationManager.FadeInFrame(teabagFrames[0],delay));
                 break;
             case 2:
-                StartCoroutine(AnimationManager.FadeOutFrame(teacup,delay));
+                teacup.SetActive(false);
                 teacupBack.SetActive(false);
-                stageTwoActive = false;
                 break;
         }
 
@@ -204,11 +159,9 @@ public class ClickManager : MonoBehaviour
             blackoutImage.color = c;
             yield return null;
         }
-
-        rooms[activeRoom].SetActive(false);
-        rooms[roomNumber].SetActive(true);
-        activeRoom = roomNumber;
-        SceneOnLoad();
+        if(GameManager.selectedItem != null) 
+            SelectItem(GameManager.selectedItem);
+        SetUpRoom(roomNumber);
 
         while (blackoutImage.color.a > 0)
         {
@@ -223,11 +176,7 @@ public class ClickManager : MonoBehaviour
     }
     private IEnumerator SwitchToExtras()
     {
-        yield return StartCoroutine(AnimationManager.FadeOutShelf(teaShelves[activeShelf],delay));
-        activeShelf = 0;
-        switchedToExtras = true;
-        yield return StartCoroutine(AnimationManager.FadeInShelf(extrasShelves[activeShelf], delay));
-        
+        yield return null;
     }
 
     private IEnumerator SwitchPages(GameObject currentPage, GameObject desiredPage)
@@ -248,53 +197,52 @@ public class ClickManager : MonoBehaviour
     private void HideOrderButtons()
     {
         Transform buttons = rooms[activeRoom].transform.Find("Order Buttons");
-        buttons.gameObject.SetActive(false );
+        buttons.gameObject.SetActive(false);
     }
 
     private IEnumerator SwitchBackToTeaShelf()
     {
-        yield return StartCoroutine(AnimationManager.FadeOutShelf(extrasShelves[activeShelf], delay));
-
-        activeShelf = 0;
-        switchedToExtras = false;
-
-        yield return StartCoroutine(AnimationManager.FadeInShelf(teaShelves[activeShelf], delay));
+        yield return null;
     }
 
-    private void SceneOnLoad()
-    {
-        if (GameManager.selectedItem != null)
-            SelectItem(GameManager.selectedItem);
-        switch (activeRoom)
-        {
-            case 0:
-                break;
-            case 1:
-                if (GameManager.orderIngridients.Count == 0)
-                {
-                    activeShelf = 0;
-                    stageTwoActive = false;
-                    switchedToExtras = false;
-                    StartCoroutine(AnimationManager.FadeInShelf(teaShelves[0],delay));
-                }
-                break;
-            case 2:
-                if (stageTwoActive)
-                {
-                    StartCoroutine(AnimationManager.FadeInFrame(teacup, delay));
-                    teacupBack.SetActive(true);
-                }
-                
-
-                break;
-        }
-
-    }
 
     public void LoopOrder()
     {
         GameManager.updateMoney();
         CancelOrder();
+    }
+
+    private void SetUpRoom(int roomNumber)
+    {
+        rooms[activeRoom].SetActive(false);
+        rooms[roomNumber].SetActive(true);
+        activeRoom = roomNumber;
+
+        switch (roomNumber)
+        {
+            case 0:
+                break;
+            case 1:
+
+                shelfManager = rooms[activeRoom].GetComponent<ShelfManager>();
+                shelfManager.setItemsList(GameManager.teaItems);
+                if (switchedToExtras)
+                {
+                    shelfManager.setItemsList(GameManager.extraItems);
+                }
+                shelfManager.displayItems();
+                break;
+            case 2:
+                shelfManager = rooms[activeRoom].GetComponent<ShelfManager>();
+                shelfManager.setItemsList(GameManager.toppingItems);
+                if (stageTwoActive)
+                {
+                    teacup.SetActive(true);
+                    teacupBack.SetActive(true);
+                    ShowOrderButtons();
+                }
+                break;
+        }
     }
 
 }

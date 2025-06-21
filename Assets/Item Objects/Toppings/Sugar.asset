@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca64b206c194d0349823b1f26a33e08f, type: 3}
+  m_Name: Sugar
+  m_EditorClassIdentifier: 
+  id: sugar
+  name: Sugar
+  type: topping
+  flavors:
+  - sweet
+  - neutral
+  sprite: {fileID: 8322064851915762459, guid: 601c8ee38e02cbf42bc1f3bf0e18f350, type: 3}
+  nameTagSize: {x: 5.188, y: 1.2381}
+  pourMinigameSprite: {fileID: -41135474453056625, guid: 601c8ee38e02cbf42bc1f3bf0e18f350, type: 3}
+  pourSpriteColor: {r: 1, g: 1, b: 1, a: 1}
