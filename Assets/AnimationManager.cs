@@ -8,53 +8,6 @@ public class AnimationManager : MonoBehaviour
     {
         
     }
-    public static IEnumerator FadeOutShelf(GameObject group, float delay)
-    {
-        CanvasGroup cg = group.GetComponent<CanvasGroup>();
-        SpriteRenderer[] sprites = group.GetComponentsInChildren<SpriteRenderer>();
-        Color color = new Color(1, 1, 1, 1);
-        cg.interactable = false;
-        cg.blocksRaycasts = false;
-
-        while (color.a > 0)
-        {
-            color.a -= Time.deltaTime / delay;
-            foreach (SpriteRenderer sprite in sprites)
-            {
-                sprite.color = color;
-            }
-            yield return null;
-        }
-        group.SetActive(false);
-        yield return null;
-    }
-
-    public static IEnumerator FadeInShelf(GameObject group, float delay)
-    {
-        group.SetActive(true);
-        CanvasGroup cg = group.GetComponent<CanvasGroup>();
-
-        SpriteRenderer[] sprites = group.GetComponentsInChildren<SpriteRenderer>();
-        Color color = new Color(1, 1, 1, 0);
-        cg.interactable = false;
-        cg.blocksRaycasts = false;
-
-        while (color.a < 1)
-        {
-            color.a += Time.deltaTime / delay;
-            foreach (SpriteRenderer sprite in sprites)
-            {
-                sprite.color = color;
-            }
-            yield return null;
-        }
-
-        cg.interactable = true;
-        cg.blocksRaycasts = true;
-
-        yield return null;
-    }
-
     public static IEnumerator FadeOutFrame(GameObject frame, float delay)
     {
         Color color = new Color(1, 1, 1, 1);
@@ -89,5 +42,38 @@ public class AnimationManager : MonoBehaviour
 
         yield return null;
     }
+
+    public static IEnumerator FadeInCat(SpriteRenderer sr, float delay)
+    {
+        Color color = new Color(1, 1, 1, 0);
+
+        while (color.a < 1)
+        {
+            color.a += Time.deltaTime / delay;
+
+            sr.color = color;
+
+            yield return null;
+        }
+
+        yield return null;
+    }
+
+    public static IEnumerator FadeOutCat(SpriteRenderer sr, float delay)
+    {
+        Color color = new Color(1, 1, 1, 1);
+
+        while (color.a > 0)
+        {
+            color.a -= Time.deltaTime / delay;
+
+            sr.color = color;
+
+            yield return null;
+        }
+
+        yield return null;
+    }
+
 
 }

@@ -21,5 +21,5 @@ MonoBehaviour:
   - citrusy
   sprite: {fileID: -61595582777223207, guid: 601c8ee38e02cbf42bc1f3bf0e18f350, type: 3}
   nameTagSize: {x: 5.188, y: 3}
-  pourMinigameSprite: {fileID: -41135474453056625, guid: 601c8ee38e02cbf42bc1f3bf0e18f350, type: 3}
-  pourSpriteColor: {r: 0.91194963, g: 0.8178213, b: 0.15199152, a: 1}
+  pourMinigameSprite: {fileID: 2188697516311529301, guid: 9bbb9380f4079c64ca9ddb96a927c5f8, type: 3}
+  pourSpriteColor: {r: 1, g: 1, b: 1, a: 1}

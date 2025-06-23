@@ -1,8 +1,11 @@
 using UnityEngine;
+using System.Collections;
 
 public class BrewingMinigameManager : MonoBehaviour
 {
     public static BrewingMinigameManager Instance { get; private set; }
+
+    public ParticleSystem successParticles;
 
     public GameObject minigame;
     public GameObject minigamePointer;
@@ -10,6 +13,7 @@ public class BrewingMinigameManager : MonoBehaviour
     static UnityEngine.Vector3 minigamePointerPos;
     static bool goingUp;
     static float score;
+    static bool stopped = false;
    
     void Awake()
     {
@@ -27,7 +31,7 @@ public class BrewingMinigameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (minigame.activeSelf)
+        if (minigame.activeSelf && !stopped)
         {
             UpdateMinigame();
         }
@@ -35,11 +39,23 @@ public class BrewingMinigameManager : MonoBehaviour
 
     public void StopMinigame()
     {
+        stopped = true;
         float actualDistance = Mathf.Abs(minigamePointerPosY - 1.27f);
         float normalizedScore = Mathf.Clamp01(1f - (actualDistance / 5.2f));
         score = Mathf.RoundToInt(normalizedScore * 100);
         Debug.Log(minigamePointerPos);
         Debug.Log(score);
+
+        if (score >= 90 && successParticles != null)
+        {
+            successParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            successParticles.Play();
+            Debug.Log("playing particles");
+            StartCoroutine(Delayed());
+            return;
+        }
+
+        
 
         minigamePointerPos.y = 1.27f;
         minigamePointer.transform.localPosition = minigamePointerPos;
@@ -48,6 +64,7 @@ public class BrewingMinigameManager : MonoBehaviour
 
     public void StartMinigame()
     {
+        stopped = false;
         score = 0;
         minigame.SetActive(true);
         goingUp = true;
@@ -80,6 +97,13 @@ public class BrewingMinigameManager : MonoBehaviour
         }
     }
 
+    private IEnumerator Delayed()
+    {
+        yield return new WaitForSeconds(0.2f); // 300 ms delay
+        minigamePointerPos.y = 1.27f;
+        minigamePointer.transform.localPosition = minigamePointerPos;
+        minigame.SetActive(false);
+    }
     static public float getScore()
     {
         return score;

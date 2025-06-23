@@ -16,8 +16,8 @@ public class ClickManager : MonoBehaviour
     public GameObject teacupBack;
     static ShelfManager shelfManager;
     int activeRoom = 0;
-    bool switchedToExtras = false;
-    bool stageTwoActive = false;
+    static bool switchedToExtras = false;
+    static bool stageTwoActive = false;
     float delay = 0.5f;
     public void RightButtonClick()
     {
@@ -34,7 +34,7 @@ public class ClickManager : MonoBehaviour
     public void TeabagClick()
     {
         Debug.Log("click");
-        if (stageTwoActive)
+        if (stageTwoActive || OrderManager.ready)
         {
             return;
         }
@@ -100,14 +100,18 @@ public class ClickManager : MonoBehaviour
 
     public void ConfirmOrder()
     {
+        Debug.Log("Order confirmed");
         HideOrderButtons();
         if(activeRoom == 1)
         {
             stageTwoActive = true;
+            foreach(var frame in teabagFrames)
+                frame.SetActive(false);
         }
         if (activeRoom == 2)
         {
-            LoopOrder();
+            ClearOrderDisplay();
+            OrderManager.ready = true;
         }
         
     }
@@ -123,6 +127,17 @@ public class ClickManager : MonoBehaviour
         switchedToExtras = false;
         stageTwoActive = false;
 
+        ClearOrderDisplay();
+        GameManager.ClearOrder();
+    }
+
+    public static void ResetOrderSpace()
+    {
+        switchedToExtras = false;
+        stageTwoActive = false;
+    }
+    private void ClearOrderDisplay()
+    {
         switch (activeRoom)
         {
             case 1:
@@ -142,9 +157,6 @@ public class ClickManager : MonoBehaviour
                 teacupBack.SetActive(false);
                 break;
         }
-
-        GameManager.ClearOrder();
-        
 
     }
 
@@ -174,17 +186,6 @@ public class ClickManager : MonoBehaviour
 
         yield return null;
     }
-    private IEnumerator SwitchToExtras()
-    {
-        yield return null;
-    }
-
-    private IEnumerator SwitchPages(GameObject currentPage, GameObject desiredPage)
-    {
-            yield return StartCoroutine(AnimationManager.FadeOutShelf(currentPage, delay));
-            yield return StartCoroutine(AnimationManager.FadeInShelf(desiredPage, delay));
-        
-    }
 
     private void ShowOrderButtons()
     {
@@ -198,18 +199,6 @@ public class ClickManager : MonoBehaviour
     {
         Transform buttons = rooms[activeRoom].transform.Find("Order Buttons");
         buttons.gameObject.SetActive(false);
-    }
-
-    private IEnumerator SwitchBackToTeaShelf()
-    {
-        yield return null;
-    }
-
-
-    public void LoopOrder()
-    {
-        GameManager.updateMoney();
-        CancelOrder();
     }
 
     private void SetUpRoom(int roomNumber)
@@ -226,6 +215,20 @@ public class ClickManager : MonoBehaviour
 
                 shelfManager = rooms[activeRoom].GetComponent<ShelfManager>();
                 shelfManager.setItemsList(GameManager.teaItems);
+                if(!stageTwoActive && !OrderManager.ready)
+                {
+                    shelfManager.resetIndex();
+                    if(GameManager.orderIngridients.Count > 0)
+                    ShowOrderButtons();
+                    if(GameManager.orderIngridients.Count == 0)
+                        foreach (var frame in teabagFrames)
+                        {
+                            frame.SetActive(true);
+                            Color color = new Color(1, 1, 1, 1);
+                            SpriteRenderer sr = frame.GetComponent<SpriteRenderer>();
+                            sr.color = color;
+                        }
+                }
                 if (switchedToExtras)
                 {
                     shelfManager.setItemsList(GameManager.extraItems);
