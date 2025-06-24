@@ -75,6 +75,7 @@ public class BrewingMinigameManager : MonoBehaviour
 
     private void UpdateMinigame()
     {
+
         if (minigamePointerPosY >= 6.50f)
         {
             goingUp = false;
@@ -85,16 +86,15 @@ public class BrewingMinigameManager : MonoBehaviour
         }
         if (!goingUp)
         {
-            minigamePointerPosY -= 0.04f;
-            minigamePointerPos.y = minigamePointerPosY;
-            minigamePointer.transform.localPosition = minigamePointerPos;
+            minigamePointerPosY -= 10f*Time.deltaTime;
+           
         }
         if (goingUp)
         {
-            minigamePointerPosY += 0.04f;
-            minigamePointerPos.y = minigamePointerPosY;
-            minigamePointer.transform.localPosition = minigamePointerPos;
+            minigamePointerPosY += 10f*Time.deltaTime;
         }
+        minigamePointerPos.y = minigamePointerPosY;
+        minigamePointer.transform.localPosition = minigamePointerPos;
     }
 
     private IEnumerator Delayed()
